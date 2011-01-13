@@ -25,6 +25,7 @@ static void* _webkit_web_view_new() {
 */
 import "C"
 import "gtk"
+import "glib"
 import "unsafe"
 
 type WebKitWebView struct {
@@ -109,3 +110,22 @@ func (v *WebKitWebView) LoadUri(uri string) {
 //WEBKIT_API G_CONST_RETURN gchar * webkit_web_view_get_icon_uri (WebKitWebView *webView);
 //WEBKIT_API void webkit_set_cache_model (WebKitCacheModel cache_model);
 //WEBKIT_API WebKitCacheModel webkit_get_cache_model (void);
+
+func SoupUriNew(uri string) *C.SoupURI {
+	ptr := C.CString(uri)
+	defer C.free_string(ptr)
+	return C.soup_uri_new(ptr)
+}
+
+func SoupUriFree(soup_uri *C.SoupURI) {
+	C.soup_uri_free(soup_uri)
+}
+
+
+type SoupSession struct {
+	glib.GObject
+}
+
+func GetDefaultSession() *SoupSession {
+	return &SoupSession{glib.GObject{unsafe.Pointer(C.webkit_get_default_session())}}
+}
