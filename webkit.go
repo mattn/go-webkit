@@ -56,9 +56,25 @@ func (v *WebKitWebView) LoadUri(uri string) {
 //WEBKIT_API void webkit_web_view_open (WebKitWebView *web_view, const gchar *uri);
 //WEBKIT_API void webkit_web_view_reload (WebKitWebView *web_view);
 //WEBKIT_API void webkit_web_view_reload_bypass_cache (WebKitWebView *web_view);
-////WEBKIT_API void webkit_web_view_load_uri (WebKitWebView *web_view, const gchar *uri);
-//WEBKIT_API void webkit_web_view_load_string (WebKitWebView *web_view, const gchar *content, const gchar *mime_type, const gchar *encoding, const gchar *base_uri);
+func (v *WebKitWebView) LoadString(content, mime_type, encoding, base_uri string) {
+	pcontent := C.CString(content)
+	defer C.free_string(pcontent)
+	pmime_type := C.CString(mime_type)
+	defer C.free_string(pmime_type)
+	pencoding := C.CString(encoding)
+	defer C.free_string(pencoding)
+	pbase_uri := C.CString(base_uri)
+	defer C.free_string(pbase_uri)
+	C.webkit_web_view_load_string(C.to_WebKitWebView(unsafe.Pointer(v.Widget)), C.to_gcharptr(pcontent), C.to_gcharptr(pmime_type), C.to_gcharptr(pencoding), C.to_gcharptr(pbase_uri))
+}
 //WEBKIT_API void webkit_web_view_load_html_string (WebKitWebView *web_view,  const gchar *content,  const gchar *base_uri);
+func (v *WebKitWebView) LoadHtmlString(content, base_uri string) {
+	pcontent := C.CString(content)
+	defer C.free_string(pcontent)
+	pbase_uri := C.CString(base_uri)
+	defer C.free_string(pbase_uri)
+	C.webkit_web_view_load_html_string(C.to_WebKitWebView(unsafe.Pointer(v.Widget)), C.to_gcharptr(pcontent), C.to_gcharptr(pbase_uri))
+}
 //WEBKIT_API void webkit_web_view_load_request (WebKitWebView *web_view, WebKitNetworkRequest *request);
 //WEBKIT_API gboolean webkit_web_view_search_text (WebKitWebView *web_view, const gchar *text, gboolean case_sensitive, gboolean forward, gboolean wrap);
 //WEBKIT_API guint webkit_web_view_mark_text_matches (WebKitWebView *web_view, const gchar *string, gboolean case_sensitive, guint limit);
