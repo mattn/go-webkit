@@ -62,9 +62,9 @@ $(function() {
 
 	proxy := os.Getenv("HTTP_PROXY")
 	if len(proxy) > 0 {
-		soup_uri := webkit.SoupUriNew(proxy)
+		soup_uri := webkit.SoupUri(proxy)
 		webkit.GetDefaultSession().Set("proxy-uri", soup_uri)
-		webkit.SoupUriFree(soup_uri)
+		soup_uri.Free()
 	}
 	gtk.Main()
 }
