@@ -43,6 +43,9 @@ func gboolean2bool(b C.gboolean) bool {
 	return false
 }
 
+//-----------------------------------------------------------------------
+// WebView
+//-----------------------------------------------------------------------
 type WebKitWebView struct {
 	gtk.GtkWidget
 }
@@ -171,32 +174,75 @@ func (v *WebKitWebView) SetEditable(flag bool) {
 //WEBKIT_API WebKitWebInspector * webkit_web_view_get_inspector (WebKitWebView *web_view);
 //WEBKIT_API WebKitWebWindowFeatures* webkit_web_view_get_window_features (WebKitWebView *web_view);
 //WEBKIT_API gboolean webkit_web_view_can_show_mime_type (WebKitWebView *web_view, const gchar *mime_type);
-//WEBKIT_API gboolean webkit_web_view_get_transparent (WebKitWebView *web_view);
-//WEBKIT_API void webkit_web_view_set_transparent (WebKitWebView *web_view, gboolean flag);
-//WEBKIT_API gfloat webkit_web_view_get_zoom_level (WebKitWebView *web_view);
-//WEBKIT_API void webkit_web_view_set_zoom_level (WebKitWebView *web_view, gfloat zoom_level);
-//WEBKIT_API void webkit_web_view_zoom_in (WebKitWebView *web_view);
-//WEBKIT_API void webkit_web_view_zoom_out (WebKitWebView *web_view);
-//WEBKIT_API gboolean webkit_web_view_get_full_content_zoom (WebKitWebView *web_view);
-//WEBKIT_API void webkit_web_view_set_full_content_zoom (WebKitWebView *web_view, gboolean full_content_zoom);
-//WEBKIT_API SoupSession* webkit_get_default_session (void);
-//WEBKIT_API const gchar* webkit_web_view_get_encoding (WebKitWebView * webView);
-//WEBKIT_API void webkit_web_view_set_custom_encoding (WebKitWebView * webView, const gchar * encoding);
-//WEBKIT_API const char* webkit_web_view_get_custom_encoding (WebKitWebView * webView);
+func (v *WebKitWebView) GetTransparent() bool {
+	return gboolean2bool(C.webkit_web_view_get_transparent(C.to_WebKitWebView(unsafe.Pointer(v.Widget))))
+}
+func (v *WebKitWebView) SetTransparent(flag bool) {
+	C.webkit_web_view_set_transparent(C.to_WebKitWebView(unsafe.Pointer(v.Widget)), bool2gboolean(flag))
+}
+func (v *WebKitWebView) GetZoomLevel(zoom_level float) float {
+	return float(C.webkit_web_view_get_zoom_level(C.to_WebKitWebView(unsafe.Pointer(v.Widget))))
+}
+func (v *WebKitWebView) SetZoomLevel(zoom_level float) {
+	C.webkit_web_view_set_zoom_level(C.to_WebKitWebView(unsafe.Pointer(v.Widget)), C.gfloat(zoom_level))
+}
+func (v *WebKitWebView) ZoomIn() {
+	C.webkit_web_view_zoom_in(C.to_WebKitWebView(unsafe.Pointer(v.Widget)))
+}
+func (v *WebKitWebView) ZoomOut() {
+	C.webkit_web_view_zoom_out(C.to_WebKitWebView(unsafe.Pointer(v.Widget)))
+}
+func (v *WebKitWebView) GetFullContentZoom() bool {
+	return gboolean2bool(C.webkit_web_view_get_full_content_zoom(C.to_WebKitWebView(unsafe.Pointer(v.Widget))))
+}
+func (v *WebKitWebView) SetFullContentZoom(full_content_zoom bool) {
+	C.webkit_web_view_set_full_content_zoom(C.to_WebKitWebView(unsafe.Pointer(v.Widget)), bool2gboolean(full_content_zoom))
+}
+func GetDefaultSession() *SoupSession {
+	return &SoupSession{glib.GObject{unsafe.Pointer(C.webkit_get_default_session())}}
+}
+func (v *WebKitWebView) GetEncoding() string {
+	return C.GoString(C.to_charptr(C.webkit_web_view_get_encoding(C.to_WebKitWebView(unsafe.Pointer(v.Widget)))))
+}
+func (v *WebKitWebView) SetCustomEncoding(encoding string) {
+	pencoding := C.CString(encoding)
+	defer C.free_string(pencoding)
+	C.webkit_web_view_set_custom_encoding(C.to_WebKitWebView(unsafe.Pointer(v.Widget)), C.to_gcharptr(pencoding))
+}
+func (v *WebKitWebView) GetCustomEncoding() string {
+	return C.GoString(C.webkit_web_view_get_custom_encoding(C.to_WebKitWebView(unsafe.Pointer(v.Widget))))
+}
 //WEBKIT_API void webkit_web_view_move_cursor (WebKitWebView * webView, GtkMovementStep step, gint count);
 //WEBKIT_API WebKitLoadStatus webkit_web_view_get_load_status (WebKitWebView *web_view);
 //WEBKIT_API gdouble webkit_web_view_get_progress (WebKitWebView *web_view);
-//WEBKIT_API void webkit_web_view_undo (WebKitWebView *webView);
-//WEBKIT_API gboolean webkit_web_view_can_undo (WebKitWebView *webView);
-//WEBKIT_API void webkit_web_view_redo (WebKitWebView *webView);
-//WEBKIT_API gboolean webkit_web_view_can_redo (WebKitWebView *webView);
-//WEBKIT_API void webkit_web_view_set_view_source_mode (WebKitWebView *web_view, gboolean view_source_mode);
-//WEBKIT_API gboolean webkit_web_view_get_view_source_mode (WebKitWebView *web_view);
+func (v *WebKitWebView) CanUndo() bool {
+	return gboolean2bool(C.webkit_web_view_can_undo(C.to_WebKitWebView(unsafe.Pointer(v.Widget))))
+}
+func (v *WebKitWebView) Undo() {
+	C.webkit_web_view_undo(C.to_WebKitWebView(unsafe.Pointer(v.Widget)))
+}
+func (v *WebKitWebView) CanRedo() bool {
+	return gboolean2bool(C.webkit_web_view_can_redo(C.to_WebKitWebView(unsafe.Pointer(v.Widget))))
+}
+func (v *WebKitWebView) Redo() {
+	C.webkit_web_view_redo(C.to_WebKitWebView(unsafe.Pointer(v.Widget)))
+}
+func (v *WebKitWebView) GetViewSourceMode() bool {
+	return gboolean2bool(C.webkit_web_view_get_view_source_mode(C.to_WebKitWebView(unsafe.Pointer(v.Widget))))
+}
+func (v *WebKitWebView) SetViewSourceMode(view_source_mode bool) {
+	C.webkit_web_view_set_view_source_mode(C.to_WebKitWebView(unsafe.Pointer(v.Widget)), bool2gboolean(view_source_mode))
+}
 //WEBKIT_API WebKitHitTestResult* webkit_web_view_get_hit_test_result (WebKitWebView *webView, GdkEventButton *event);
-//WEBKIT_API G_CONST_RETURN gchar * webkit_web_view_get_icon_uri (WebKitWebView *webView);
+func (v *WebKitWebView) GetIconUri() string {
+	return C.GoString(C.to_charptr(C.webkit_web_view_get_icon_uri(C.to_WebKitWebView(unsafe.Pointer(v.Widget)))))
+}
 //WEBKIT_API void webkit_set_cache_model (WebKitCacheModel cache_model);
 //WEBKIT_API WebKitCacheModel webkit_get_cache_model (void);
 
+//-----------------------------------------------------------------------
+// SoupURI
+//-----------------------------------------------------------------------
 type SoupURI struct {
 	glib.WrappedObject
 	value *C.SoupURI
@@ -217,10 +263,10 @@ func (v *SoupURI) Free() {
 }
 
 
+//-----------------------------------------------------------------------
+// SoupSession
+//-----------------------------------------------------------------------
 type SoupSession struct {
 	glib.GObject
 }
 
-func GetDefaultSession() *SoupSession {
-	return &SoupSession{glib.GObject{unsafe.Pointer(C.webkit_get_default_session())}}
-}
