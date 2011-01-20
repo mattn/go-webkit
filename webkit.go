@@ -198,17 +198,22 @@ func (v *WebKitWebView) SetEditable(flag bool) {
 //WEBKIT_API WebKitCacheModel webkit_get_cache_model (void);
 
 type SoupURI struct {
-	glib.ObjectLike
+	glib.WrappedObject
+	value *C.SoupURI
 }
 
 func SoupUri(uri string) *SoupURI {
 	ptr := C.CString(uri)
 	defer C.free_string(ptr)
-	return &SoupURI{ glib.GObject{ unsafe.Pointer(C.soup_uri_new(ptr)) }}
+	return &SoupURI{ nil, C.soup_uri_new(ptr) }
+}
+
+func (v *SoupURI) GetInternalValue() unsafe.Pointer {
+	return unsafe.Pointer(v.value)
 }
 
 func (v *SoupURI) Free() {
-	C.soup_uri_free((*C.SoupURI)(v.GetInternalValue()))
+	C.soup_uri_free(v.value)
 }
 
 
