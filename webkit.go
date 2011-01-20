@@ -52,25 +52,26 @@ type WebKitWebView struct {
 	gtk.GtkWidget
 }
 
-func WebView() *WebKitWebView {
-	return &WebKitWebView{gtk.GtkWidget{gtk.FromNative(C._webkit_web_view_new())}}
-}
 func (v *WebKitWebView) getWebView() *C.WebKitWebView {
 	return C.to_WebKitWebView(unsafe.Pointer(v.Widget))
+}
+func WebView() *WebKitWebView {
+	return &WebKitWebView{gtk.GtkWidget{gtk.FromNative(C._webkit_web_view_new())}}
 }
 func (v *WebKitWebView) LoadUri(uri string) {
 	ptr := C.CString(uri)
 	defer C.free_string(ptr)
 	C.webkit_web_view_load_uri(v.getWebView(), C.to_gcharptr(ptr))
 }
-// TODO
 func (v *WebKitWebView) GetTitle() string {
 	return C.GoString(C.to_charptr(C.webkit_web_view_get_title(v.getWebView())))
 }
 func (v *WebKitWebView) GetUri() string {
 	return C.GoString(C.to_charptr(C.webkit_web_view_get_uri(v.getWebView())))
 }
-//WEBKIT_API void webkit_web_view_set_maintains_back_forward_list (WebKitWebView *web_view, gboolean flag);
+func (v *WebKitWebView) SetMaintainsBackForwardList(flag bool) {
+	C.webkit_web_view_set_maintains_back_forward_list(v.getWebView(), bool2gboolean(flag))
+}
 //WEBKIT_API WebKitWebBackForwardList *webkit_web_view_get_back_forward_list (WebKitWebView *web_view);
 //WEBKIT_API gboolean webkit_web_view_go_to_back_forward_item (WebKitWebView *web_view, WebKitWebHistoryItem *item);
 func (v *WebKitWebView) CanGoBack() bool {
@@ -124,7 +125,11 @@ func (v *WebKitWebView) LoadHtmlString(content, base_uri string) {
 	C.webkit_web_view_load_html_string(v.getWebView(), C.to_gcharptr(pcontent), C.to_gcharptr(pbase_uri))
 }
 //WEBKIT_API void webkit_web_view_load_request (WebKitWebView *web_view, WebKitNetworkRequest *request);
-//WEBKIT_API gboolean webkit_web_view_search_text (WebKitWebView *web_view, const gchar *text, gboolean case_sensitive, gboolean forward, gboolean wrap);
+func (v *WebKitWebView) SearchText(text string, case_sensitive bool, forward bool, wrap bool) bool {
+	ptext := C.CString(text)
+	defer C.free_string(ptext)
+	return gboolean2bool(C.webkit_web_view_search_text(v.getWebView(), C.to_gcharptr(ptext), bool2gboolean(case_sensitive), bool2gboolean(forward), bool2gboolean(wrap)))
+}
 //WEBKIT_API guint webkit_web_view_mark_text_matches (WebKitWebView *web_view, const gchar *string, gboolean case_sensitive, guint limit);
 func (v *WebKitWebView) SetHighlightTextMatches(highlight bool) {
 	C.webkit_web_view_set_highlight_text_matches(v.getWebView(), bool2gboolean(highlight))
@@ -136,7 +141,10 @@ func (v *WebKitWebView) GetMainFrame() *WebKitWebFrame {
 	return &WebKitWebFrame{glib.GObject{unsafe.Pointer(C.webkit_web_view_get_main_frame(v.getWebView()))}}
 }
 
-//WEBKIT_API WebKitWebFrame * webkit_web_view_get_focused_frame (WebKitWebView *web_view);
+func (v *WebKitWebView) GetFocusedFrame() *WebKitWebFrame {
+	return &WebKitWebFrame{glib.GObject{unsafe.Pointer(C.webkit_web_view_get_focused_frame(v.getWebView()))}}
+}
+
 func (v *WebKitWebView) ExecuteScript(script string) {
 	pscript := C.CString(script)
 	defer C.free_string(pscript)
@@ -222,7 +230,9 @@ func (v *WebKitWebView) GetCustomEncoding() string {
 }
 //WEBKIT_API void webkit_web_view_move_cursor (WebKitWebView * webView, GtkMovementStep step, gint count);
 //WEBKIT_API WebKitLoadStatus webkit_web_view_get_load_status (WebKitWebView *web_view);
-//WEBKIT_API gdouble webkit_web_view_get_progress (WebKitWebView *web_view);
+func (v *WebKitWebView) GetProgress() float {
+	return float(C.webkit_web_view_get_progress(v.getWebView()))
+}
 func (v *WebKitWebView) CanUndo() bool {
 	return gboolean2bool(C.webkit_web_view_can_undo(v.getWebView()))
 }
@@ -292,44 +302,60 @@ func (v *WebKitWebFrame) getWebFrame() *C.WebKitWebFrame {
 //                                                          const gchar *name);
 // WebKitWebDataSource * webkit_web_frame_get_data_source  (WebKitWebFrame *frame);
 // JSGlobalContextRef  webkit_web_frame_get_global_context (WebKitWebFrame *frame);
-// GtkPolicyType       webkit_web_frame_get_horizontal_scrollbar_policy
-//                                                         (WebKitWebFrame *frame);
+func (v *WebKitWebFrame) GetHorizontalScrollbarPolicy() uint {
+	return uint(C.webkit_web_frame_get_horizontal_scrollbar_policy(v.getWebFrame()))
+}
 // WebKitLoadStatus    webkit_web_frame_get_load_status    (WebKitWebFrame *frame);
-// const gchar *       webkit_web_frame_get_name           (WebKitWebFrame *frame);
-// WebKitNetworkResponse * webkit_web_frame_get_network_response
-//                                                         (WebKitWebFrame *frame);
-// WebKitWebFrame *    webkit_web_frame_get_parent         (WebKitWebFrame *frame);
-// WebKitWebDataSource * webkit_web_frame_get_provisional_data_source
-//                                                         (WebKitWebFrame *frame);
-// WebKitSecurityOrigin * webkit_web_frame_get_security_origin
-//                                                         (WebKitWebFrame *frame);
-// const gchar *       webkit_web_frame_get_title          (WebKitWebFrame *frame);
-// const gchar *       webkit_web_frame_get_uri            (WebKitWebFrame *frame);
+func (v *WebKitWebFrame) GetName() string {
+	return C.GoString(C.to_charptr(C.webkit_web_frame_get_name(v.getWebFrame())))
+}
+// WebKitNetworkResponse * webkit_web_frame_get_network_response(WebKitWebFrame *frame);
+// WebKitWebFrame* webkit_web_frame_get_parent(WebKitWebFrame *frame);
+// WebKitWebDataSource * webkit_web_frame_get_provisional_data_source(WebKitWebFrame *frame);
+// WebKitSecurityOrigin * webkit_web_frame_get_security_origin(WebKitWebFrame *frame);
+func (v *WebKitWebFrame) GetTitle() string {
+	return C.GoString(C.to_charptr(C.webkit_web_frame_get_title(v.getWebFrame())))
+}
 func (v *WebKitWebFrame) GetUri() string {
 	return C.GoString(C.to_charptr(C.webkit_web_frame_get_uri(v.getWebFrame())))
 }
-// GtkPolicyType       webkit_web_frame_get_vertical_scrollbar_policy
-//                                                         (WebKitWebFrame *frame);
-// WebKitWebView *     webkit_web_frame_get_web_view       (WebKitWebFrame *frame);
-// void                webkit_web_frame_load_alternate_string
-//                                                         (WebKitWebFrame *frame,
-//                                                          const gchar *content,
-//                                                          const gchar *base_url,
-//                                                          const gchar *unreachable_url);
-// void                webkit_web_frame_load_request       (WebKitWebFrame *frame,
-//                                                          WebKitNetworkRequest *request);
-// void                webkit_web_frame_load_string        (WebKitWebFrame *frame,
-//                                                          const gchar *content,
-//                                                          const gchar *mime_type,
-//                                                          const gchar *encoding,
-//                                                          const gchar *base_uri);
-// void                webkit_web_frame_load_uri           (WebKitWebFrame *frame,
-//                                                          const gchar *uri);
-// WebKitWebFrame *    webkit_web_frame_new                (WebKitWebView *web_view);
-// void                webkit_web_frame_print              (WebKitWebFrame *frame);
+func (v *WebKitWebFrame) GetVerticalScrollbarPolicy() uint {
+	return uint(C.webkit_web_frame_get_vertical_scrollbar_policy(v.getWebFrame()))
+}
+func (v *WebKitWebFrame) GetWebView() *WebKitWebView {
+	return &WebKitWebView{gtk.GtkWidget{gtk.FromNative(unsafe.Pointer(C.webkit_web_frame_get_web_view(v.getWebFrame())))}}
+}
+// void webkit_web_frame_load_alternate_string(WebKitWebFrame *frame, const gchar *content, const gchar *base_url, const gchar *unreachable_url);
+// void webkit_web_frame_load_request(WebKitWebFrame *frame, WebKitNetworkRequest *request);
+func (v *WebKitWebFrame) LoadString(content, mime_type, encoding, base_uri string) {
+	pcontent := C.CString(content)
+	defer C.free_string(pcontent)
+	pmime_type := C.CString(mime_type)
+	defer C.free_string(pmime_type)
+	pencoding := C.CString(encoding)
+	defer C.free_string(pencoding)
+	pbase_uri := C.CString(base_uri)
+	defer C.free_string(pbase_uri)
+	C.webkit_web_frame_load_string(v.getWebFrame(), C.to_gcharptr(pcontent), C.to_gcharptr(pmime_type), C.to_gcharptr(pencoding), C.to_gcharptr(pbase_uri))
+}
+func (v *WebKitWebFrame) LoadUri(uri string) {
+	ptr := C.CString(uri)
+	defer C.free_string(ptr)
+	C.webkit_web_frame_load_uri(v.getWebFrame(), C.to_gcharptr(ptr))
+}
+func WebFrame(view *WebKitWebView) *WebKitWebFrame {
+	return &WebKitWebFrame{glib.GObject{unsafe.Pointer(C.webkit_web_frame_new(view.getWebView()))}}
+}
+func (v *WebKitWebFrame) Print() {
+	C.webkit_web_frame_print(v.getWebFrame())
+}
 // GtkPrintOperationResult  webkit_web_frame_print_full    (WebKitWebFrame *frame,
 //                                                          GtkPrintOperation *operation,
 //                                                          GtkPrintOperationAction action,
 //                                                          GError **error);
-// void                webkit_web_frame_reload             (WebKitWebFrame *frame);
-// void                webkit_web_frame_stop_loading       (WebKitWebFrame *frame);
+func (v *WebKitWebFrame) Reload() {
+	C.webkit_web_frame_reload(v.getWebFrame())
+}
+func (v *WebKitWebFrame) StopLoading() {
+	C.webkit_web_frame_stop_loading(v.getWebFrame())
+}
