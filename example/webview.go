@@ -12,22 +12,26 @@ func main() {
 
 	vbox := gtk.VBox(false, 1)
 
+	entry := gtk.Entry()
+	entry.SetText("http://mattn.kaoriya.net/")
+	vbox.PackStart(entry, false, false, 0)
+
 	swin := gtk.ScrolledWindow(nil, nil)
 	swin.SetPolicy(gtk.GTK_POLICY_AUTOMATIC, gtk.GTK_POLICY_AUTOMATIC)
 	swin.SetShadowType(gtk.GTK_SHADOW_IN)
 
 	webview := webkit.WebView()
+	webview.Connect("load-committed", func() {
+		entry.SetText(webview.GetUri())
+	}, nil)
 	swin.Add(webview)
 
 	vbox.Add(swin)
 
-	button := gtk.ButtonWithLabel("load URI")
-	button.Clicked(func() {
-		webview.LoadUri("http://mattn.kaoriya.net/")
+	entry.Connect("activate", func() {
+		webview.LoadUri(entry.GetText())
 	}, nil)
-	vbox.PackStart(button, false, false, 0)
-
-	button = gtk.ButtonWithLabel("load String")
+	button := gtk.ButtonWithLabel("load String")
 	button.Clicked(func() {
 		webview.LoadString("hello Go GTK!", "text/plain", "utf-8", ".")
 	}, nil)
