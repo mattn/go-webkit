@@ -196,10 +196,10 @@ func (v *WebKitWebView) GetTransparent() bool {
 func (v *WebKitWebView) SetTransparent(flag bool) {
 	C.webkit_web_view_set_transparent(v.getWebView(), bool2gboolean(flag))
 }
-func (v *WebKitWebView) GetZoomLevel(zoom_level float) float {
-	return float(C.webkit_web_view_get_zoom_level(v.getWebView()))
+func (v *WebKitWebView) GetZoomLevel(zoom_level float64) float64 {
+	return float64(C.webkit_web_view_get_zoom_level(v.getWebView()))
 }
-func (v *WebKitWebView) SetZoomLevel(zoom_level float) {
+func (v *WebKitWebView) SetZoomLevel(zoom_level float64) {
 	C.webkit_web_view_set_zoom_level(v.getWebView(), C.gfloat(zoom_level))
 }
 func (v *WebKitWebView) ZoomIn() {
@@ -230,8 +230,8 @@ func (v *WebKitWebView) GetCustomEncoding() string {
 }
 //WEBKIT_API void webkit_web_view_move_cursor (WebKitWebView * webView, GtkMovementStep step, gint count);
 //WEBKIT_API WebKitLoadStatus webkit_web_view_get_load_status (WebKitWebView *web_view);
-func (v *WebKitWebView) GetProgress() float {
-	return float(C.webkit_web_view_get_progress(v.getWebView()))
+func (v *WebKitWebView) GetProgress() float64 {
+	return float64(C.webkit_web_view_get_progress(v.getWebView()))
 }
 func (v *WebKitWebView) CanUndo() bool {
 	return gboolean2bool(C.webkit_web_view_can_undo(v.getWebView()))
