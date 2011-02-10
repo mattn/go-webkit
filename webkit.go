@@ -19,13 +19,13 @@ static inline gchar* to_gcharptr(const char* s) { return (gchar*)s; }
 
 static inline char* to_charptr(const gchar* s) { return (char*)s; }
 
+//static GtkWidget* to_GtkWidget(void* w) { return GTK_WIDGET(w); }
+
 static WebKitWebView* to_WebKitWebView(void* w) { return WEBKIT_WEB_VIEW(w); }
 
 static WebKitWebFrame* to_WebKitWebFrame(void* w) { return WEBKIT_WEB_FRAME(w); }
 
-static void* _webkit_web_view_new() {
-	return webkit_web_view_new();
-}
+static WebKitWebSettings* to_WebKitWebSettings(void* w) { return WEBKIT_WEB_SETTINGS(w); }
 */
 import "C"
 import "gtk"
@@ -56,7 +56,7 @@ func (v *WebKitWebView) getWebView() *C.WebKitWebView {
 	return C.to_WebKitWebView(unsafe.Pointer(v.Widget))
 }
 func WebView() *WebKitWebView {
-	return &WebKitWebView{gtk.GtkWidget{gtk.FromNative(C._webkit_web_view_new())}}
+	return &WebKitWebView{gtk.GtkWidget{gtk.FromNative(unsafe.Pointer(C.webkit_web_view_new()))}}
 }
 func (v *WebKitWebView) LoadUri(uri string) {
 	ptr := C.CString(uri)
@@ -185,8 +185,12 @@ func (v *WebKitWebView) SetEditable(flag bool) {
 }
 //WEBKIT_API GtkTargetList * webkit_web_view_get_copy_target_list (WebKitWebView *web_view);
 //WEBKIT_API GtkTargetList * webkit_web_view_get_paste_target_list (WebKitWebView *web_view);
-//WEBKIT_API void webkit_web_view_set_settings (WebKitWebView *web_view, WebKitWebSettings *settings);
-//WEBKIT_API WebKitWebSettings * webkit_web_view_get_settings (WebKitWebView *web_view);
+func (v *WebKitWebView) SetSettings(settings *WebKitWebSettings) {
+	C.webkit_web_view_set_settings(v.getWebView(), C.to_WebKitWebSettings(settings.Object));
+}
+func (v *WebKitWebView) GetSettings() *WebKitWebSettings {
+	return &WebKitWebSettings{glib.GObject{unsafe.Pointer(C.webkit_web_view_get_settings(v.getWebView()))}}
+}
 //WEBKIT_API WebKitWebInspector * webkit_web_view_get_inspector (WebKitWebView *web_view);
 //WEBKIT_API WebKitWebWindowFeatures* webkit_web_view_get_window_features (WebKitWebView *web_view);
 //WEBKIT_API gboolean webkit_web_view_can_show_mime_type (WebKitWebView *web_view, const gchar *mime_type);
@@ -323,7 +327,8 @@ func (v *WebKitWebFrame) GetVerticalScrollbarPolicy() uint {
 	return uint(C.webkit_web_frame_get_vertical_scrollbar_policy(v.getWebFrame()))
 }
 func (v *WebKitWebFrame) GetWebView() *WebKitWebView {
-	return &WebKitWebView{gtk.GtkWidget{gtk.FromNative(unsafe.Pointer(C.webkit_web_frame_get_web_view(v.getWebFrame())))}}
+	//return &WebKitWebView{gtk.GtkWidget{gtk.FromNative(unsafe.Pointer(C.webkit_web_frame_get_web_view(v.getWebFrame())))}}
+	return nil
 }
 // void webkit_web_frame_load_alternate_string(WebKitWebFrame *frame, const gchar *content, const gchar *base_url, const gchar *unreachable_url);
 // void webkit_web_frame_load_request(WebKitWebFrame *frame, WebKitNetworkRequest *request);
@@ -358,4 +363,15 @@ func (v *WebKitWebFrame) Reload() {
 }
 func (v *WebKitWebFrame) StopLoading() {
 	C.webkit_web_frame_stop_loading(v.getWebFrame())
+}
+
+//-----------------------------------------------------------------------
+// WebSettings
+//-----------------------------------------------------------------------
+type WebKitWebSettings struct {
+	glib.GObject
+}
+
+func WebSettings() *WebKitWebSettings {
+	return &WebKitWebSettings{glib.GObject{unsafe.Pointer(C.webkit_web_settings_new())}}
 }
