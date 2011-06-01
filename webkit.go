@@ -27,9 +27,10 @@ static WebKitWebFrame* to_WebKitWebFrame(void* w) { return WEBKIT_WEB_FRAME(w); 
 
 static WebKitWebSettings* to_WebKitWebSettings(void* w) { return WEBKIT_WEB_SETTINGS(w); }
 */
+// #cgo pkg-config: webkit-1.0
 import "C"
-import "gtk"
-import "glib"
+import "github.com/mattn/go-gtk/gtk"
+import "github.com/mattn/go-gtk/glib"
 import "unsafe"
 
 func bool2gboolean(b bool) C.gboolean {

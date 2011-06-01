@@ -1,8 +1,8 @@
 package main
 
 import "os"
-import "gtk"
-import "webkit"
+import "github.com/mattn/go-gtk/gtk"
+import "github.com/mattn/go-webkit/webkit"
 
 const HTML_STRING = `
 <doctype html>
