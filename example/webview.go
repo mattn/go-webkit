@@ -32,7 +32,7 @@ func main() {
 	vbox := gtk.VBox(false, 1)
 
 	entry := gtk.Entry()
-	entry.SetText("http://mattn.kaoriya.net/")
+	entry.SetText("http://golang.org/")
 	vbox.PackStart(entry, false, false, 0)
 
 	swin := gtk.ScrolledWindow(nil, nil)
