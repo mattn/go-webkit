@@ -57,7 +57,7 @@ func (v *WebKitWebView) getWebView() *C.WebKitWebView {
 	return C.to_WebKitWebView(unsafe.Pointer(v.Widget))
 }
 func WebView() *WebKitWebView {
-	return &WebKitWebView{gtk.GtkWidget{gtk.FromNative(unsafe.Pointer(C.webkit_web_view_new()))}}
+	return &WebKitWebView{*gtk.WidgetFromNative(unsafe.Pointer(C.webkit_web_view_new()))}
 }
 func (v *WebKitWebView) LoadUri(uri string) {
 	ptr := C.CString(uri)
@@ -328,7 +328,7 @@ func (v *WebKitWebFrame) GetVerticalScrollbarPolicy() uint {
 	return uint(C.webkit_web_frame_get_vertical_scrollbar_policy(v.getWebFrame()))
 }
 func (v *WebKitWebFrame) GetWebView() *WebKitWebView {
-	//return &WebKitWebView{gtk.GtkWidget{gtk.FromNative(unsafe.Pointer(C.webkit_web_frame_get_web_view(v.getWebFrame())))}}
+	//return &WebKitWebView{gtk.GtkWidget{gtk.WidgetFromNative(unsafe.Pointer(C.webkit_web_frame_get_web_view(v.getWebFrame())))}}
 	return nil
 }
 // void webkit_web_frame_load_alternate_string(WebKitWebFrame *frame, const gchar *content, const gchar *base_url, const gchar *unreachable_url);
