@@ -42,28 +42,24 @@ func main() {
 	webview := webkit.WebView()
 	webview.Connect("load-committed", func() {
 		entry.SetText(webview.GetUri())
-	},
-		nil)
+	})
 	swin.Add(webview)
 
 	vbox.Add(swin)
 
 	entry.Connect("activate", func() {
 		webview.LoadUri(entry.GetText())
-	},
-		nil)
+	})
 	button := gtk.ButtonWithLabel("load String")
 	button.Clicked(func() {
 		webview.LoadString("hello Go GTK!", "text/plain", "utf-8", ".")
-	},
-		nil)
+	})
 	vbox.PackStart(button, false, false, 0)
 
 	button = gtk.ButtonWithLabel("load HTML String")
 	button.Clicked(func() {
 		webview.LoadHtmlString(HTML_STRING, ".")
-	},
-		nil)
+	})
 	vbox.PackStart(button, false, false, 0)
 
 	window.Add(vbox)
