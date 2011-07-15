@@ -2,7 +2,7 @@ package main
 
 import "os"
 import "github.com/mattn/go-gtk/gtk"
-import "github.com/mattn/go-webkit/webkit"
+import "github.com/mattn/go-webkit"
 
 const HTML_STRING = `
 <doctype html>
