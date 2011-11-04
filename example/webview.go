@@ -23,6 +23,11 @@ $(function() {
 </div>
 `
 
+const MAP_EMBED = `
+<style> *{ margin : 0; padding : 0; } </style>
+<iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.co.jp/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=osaka&amp;aq=&amp;sll=34.885931,-115.180664&amp;sspn=29.912003,39.506836&amp;brcurrent=3,0x6000e86b2acc70d7:0xa399ff48811f596d,0&amp;ie=UTF8&amp;hq=&amp;hnear=%E5%A4%A7%E9%98%AA%E5%BA%9C%E5%A4%A7%E9%98%AA%E5%B8%82&amp;ll=34.693738,135.502165&amp;spn=0.471406,0.617294&amp;z=11&amp;output=embed"></iframe>
+`
+
 func main() {
 	gtk.Init(nil)
 	window := gtk.Window(gtk.GTK_WINDOW_TOPLEVEL)
@@ -59,6 +64,12 @@ func main() {
 	button = gtk.ButtonWithLabel("load HTML String")
 	button.Clicked(func() {
 		webview.LoadHtmlString(HTML_STRING, ".")
+	})
+	vbox.PackStart(button, false, false, 0)
+
+	button = gtk.ButtonWithLabel("Google Maps")
+	button.Clicked(func() {
+		webview.LoadHtmlString(MAP_EMBED, ".")
 	})
 	vbox.PackStart(button, false, false, 0)
 
