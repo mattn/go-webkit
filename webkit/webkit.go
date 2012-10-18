@@ -376,3 +376,24 @@ type WebKitWebSettings struct {
 func WebSettings() *WebKitWebSettings {
 	return &WebKitWebSettings{glib.GObject{unsafe.Pointer(C.webkit_web_settings_new())}}
 }
+
+//-----------------------------------------------------------------------
+// NetworkRequest
+//-----------------------------------------------------------------------
+type WebKitNetworkRequest struct {
+	glib.GObject
+}
+
+func NetworkRequestFromNative(p unsafe.Pointer) WebKitNetworkRequest {
+	return WebKitNetworkRequest{glib.GObject{p}}
+}
+
+func (nr *WebKitNetworkRequest)URL() string {
+	return C.GoString(C.to_charptr(C.webkit_network_request_get_uri((*C.WebKitNetworkRequest)(nr.GObject.Object))))
+}
+
+func (nr *WebKitNetworkRequest)SetURL(url string) {
+	ptr := C.CString(url)
+	defer C.free_string(ptr)
+	C.webkit_network_request_set_uri((*C.WebKitNetworkRequest)(nr.GObject.Object), C.to_gcharptr(ptr))
+}
