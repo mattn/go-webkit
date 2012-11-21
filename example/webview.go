@@ -1,8 +1,10 @@
 package main
 
-import "os"
-import "github.com/mattn/go-gtk/gtk"
-import "github.com/mattn/go-webkit/webkit"
+import (
+	"os"
+	"github.com/mattn/go-gtk/gtk"
+	"github.com/mattn/go-webkit/webkit"
+)
 
 const HTML_STRING = `
 <doctype html>
@@ -83,5 +85,6 @@ func main() {
 		webkit.GetDefaultSession().Set("proxy-uri", soup_uri)
 		soup_uri.Free()
 	}
+	entry.Emit("activate")
 	gtk.Main()
 }
