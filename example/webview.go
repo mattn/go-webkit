@@ -32,21 +32,21 @@ const MAP_EMBED = `
 
 func main() {
 	gtk.Init(nil)
-	window := gtk.Window(gtk.GTK_WINDOW_TOPLEVEL)
+	window := gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
 	window.SetTitle("webkit")
 	window.Connect("destroy", gtk.MainQuit)
 
-	vbox := gtk.VBox(false, 1)
+	vbox := gtk.NewVBox(false, 1)
 
-	entry := gtk.Entry()
+	entry := gtk.NewEntry()
 	entry.SetText("http://golang.org/")
 	vbox.PackStart(entry, false, false, 0)
 
-	swin := gtk.ScrolledWindow(nil, nil)
-	swin.SetPolicy(gtk.GTK_POLICY_AUTOMATIC, gtk.GTK_POLICY_AUTOMATIC)
-	swin.SetShadowType(gtk.GTK_SHADOW_IN)
+	swin := gtk.NewScrolledWindow(nil, nil)
+	swin.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+	swin.SetShadowType(gtk.SHADOW_IN)
 
-	webview := webkit.WebView()
+	webview := webkit.NewWebView()
 	webview.Connect("load-committed", func() {
 		entry.SetText(webview.GetUri())
 	})
@@ -57,19 +57,19 @@ func main() {
 	entry.Connect("activate", func() {
 		webview.LoadUri(entry.GetText())
 	})
-	button := gtk.ButtonWithLabel("load String")
+	button := gtk.NewButtonWithLabel("load String")
 	button.Clicked(func() {
 		webview.LoadString("hello Go GTK!", "text/plain", "utf-8", ".")
 	})
 	vbox.PackStart(button, false, false, 0)
 
-	button = gtk.ButtonWithLabel("load HTML String")
+	button = gtk.NewButtonWithLabel("load HTML String")
 	button.Clicked(func() {
 		webview.LoadHtmlString(HTML_STRING, ".")
 	})
 	vbox.PackStart(button, false, false, 0)
 
-	button = gtk.ButtonWithLabel("Google Maps")
+	button = gtk.NewButtonWithLabel("Google Maps")
 	button.Clicked(func() {
 		webview.LoadHtmlString(MAP_EMBED, ".")
 	})
