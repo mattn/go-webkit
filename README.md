@@ -17,9 +17,7 @@ INSTALL:
   To experiment with go-webkit, you can just compile and run the example
   program:
 
-    make install
-    make example
-    ./example/webview
+    go run example/webview.go
 
 LICENSE:
 --------
