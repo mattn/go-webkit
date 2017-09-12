@@ -4,7 +4,9 @@ package webkit
 #ifndef uintptr
 #define uintptr unsigned int*
 #endif
+
 #include <webkit/webkit.h>
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -12,6 +14,7 @@ package webkit
 #include <string.h>
 #include <stdio.h>
 #include <pthread.h>
+
 
 static inline void free_string(char* s) { free(s); }
 
@@ -26,12 +29,18 @@ static WebKitWebView* to_WebKitWebView(void* w) { return WEBKIT_WEB_VIEW(w); }
 static WebKitWebFrame* to_WebKitWebFrame(void* w) { return WEBKIT_WEB_FRAME(w); }
 
 static WebKitWebSettings* to_WebKitWebSettings(void* w) { return WEBKIT_WEB_SETTINGS(w); }
+
+static WebKitDownload* to_WebKitDownload(void* w) { return WEBKIT_DOWNLOAD(w); }
 */
 // #cgo pkg-config: webkit-1.0
 import "C"
-import "github.com/mattn/go-gtk/gtk"
-import "github.com/mattn/go-gtk/glib"
-import "unsafe"
+
+import (
+	"unsafe"
+
+	"github.com/mattn/go-gtk/glib"
+	"github.com/mattn/go-gtk/gtk"
+)
 
 func bool2gboolean(b bool) C.gboolean {
 	if b {
@@ -73,6 +82,7 @@ func (v *WebView) GetUri() string {
 func (v *WebView) SetMaintainsBackForwardList(flag bool) {
 	C.webkit_web_view_set_maintains_back_forward_list(v.getWebView(), bool2gboolean(flag))
 }
+
 //WEBKIT_API WebKitWebBackForwardList *webkit_web_view_get_back_forward_list (WebKitWebView *web_view);
 //WEBKIT_API gboolean webkit_web_view_go_to_back_forward_item (WebKitWebView *web_view, WebKitWebHistoryItem *item);
 func (v *WebView) CanGoBack() bool {
@@ -125,12 +135,14 @@ func (v *WebView) LoadHtmlString(content, base_uri string) {
 	defer C.free_string(pbase_uri)
 	C.webkit_web_view_load_html_string(v.getWebView(), C.to_gcharptr(pcontent), C.to_gcharptr(pbase_uri))
 }
+
 //WEBKIT_API void webkit_web_view_load_request (WebKitWebView *web_view, WebKitNetworkRequest *request);
 func (v *WebView) SearchText(text string, case_sensitive bool, forward bool, wrap bool) bool {
 	ptext := C.CString(text)
 	defer C.free_string(ptext)
 	return gboolean2bool(C.webkit_web_view_search_text(v.getWebView(), C.to_gcharptr(ptext), bool2gboolean(case_sensitive), bool2gboolean(forward), bool2gboolean(wrap)))
 }
+
 //WEBKIT_API guint webkit_web_view_mark_text_matches (WebKitWebView *web_view, const gchar *string, gboolean case_sensitive, guint limit);
 func (v *WebView) SetHighlightTextMatches(highlight bool) {
 	C.webkit_web_view_set_highlight_text_matches(v.getWebView(), bool2gboolean(highlight))
@@ -184,14 +196,16 @@ func (v *WebView) GetEditable() bool {
 func (v *WebView) SetEditable(flag bool) {
 	C.webkit_web_view_set_editable(v.getWebView(), bool2gboolean(flag))
 }
+
 //WEBKIT_API GtkTargetList * webkit_web_view_get_copy_target_list (WebKitWebView *web_view);
 //WEBKIT_API GtkTargetList * webkit_web_view_get_paste_target_list (WebKitWebView *web_view);
 func (v *WebView) SetSettings(settings *WebSettings) {
-	C.webkit_web_view_set_settings(v.getWebView(), C.to_WebKitWebSettings(settings.Object));
+	C.webkit_web_view_set_settings(v.getWebView(), C.to_WebKitWebSettings(settings.Object))
 }
 func (v *WebView) GetSettings() *WebSettings {
 	return &WebSettings{glib.GObject{unsafe.Pointer(C.webkit_web_view_get_settings(v.getWebView()))}}
 }
+
 //WEBKIT_API WebKitWebInspector * webkit_web_view_get_inspector (WebKitWebView *web_view);
 //WEBKIT_API WebKitWebWindowFeatures* webkit_web_view_get_window_features (WebKitWebView *web_view);
 //WEBKIT_API gboolean webkit_web_view_can_show_mime_type (WebKitWebView *web_view, const gchar *mime_type);
@@ -233,6 +247,7 @@ func (v *WebView) SetCustomEncoding(encoding string) {
 func (v *WebView) GetCustomEncoding() string {
 	return C.GoString(C.webkit_web_view_get_custom_encoding(v.getWebView()))
 }
+
 //WEBKIT_API void webkit_web_view_move_cursor (WebKitWebView * webView, GtkMovementStep step, gint count);
 //WEBKIT_API WebKitLoadStatus webkit_web_view_get_load_status (WebKitWebView *web_view);
 func (v *WebView) GetProgress() float64 {
@@ -256,10 +271,12 @@ func (v *WebView) GetViewSourceMode() bool {
 func (v *WebView) SetViewSourceMode(view_source_mode bool) {
 	C.webkit_web_view_set_view_source_mode(v.getWebView(), bool2gboolean(view_source_mode))
 }
+
 //WEBKIT_API WebKitHitTestResult* webkit_web_view_get_hit_test_result (WebKitWebView *webView, GdkEventButton *event);
 func (v *WebView) GetIconUri() string {
 	return C.GoString(C.to_charptr(C.webkit_web_view_get_icon_uri(v.getWebView())))
 }
+
 //WEBKIT_API void webkit_set_cache_model (WebKitCacheModel cache_model);
 //WEBKIT_API WebKitCacheModel webkit_get_cache_model (void);
 
@@ -274,7 +291,7 @@ type SoupURI struct {
 func SoupUri(uri string) *SoupURI {
 	ptr := C.CString(uri)
 	defer C.free_string(ptr)
-	return &SoupURI{ nil, C.soup_uri_new(ptr) }
+	return &SoupURI{nil, C.soup_uri_new(ptr)}
 }
 
 func (v *SoupURI) GetInternalValue() unsafe.Pointer {
@@ -284,7 +301,6 @@ func (v *SoupURI) GetInternalValue() unsafe.Pointer {
 func (v *SoupURI) Free() {
 	C.soup_uri_free(v.value)
 }
-
 
 //-----------------------------------------------------------------------
 // SoupSession
@@ -299,6 +315,7 @@ type SoupSession struct {
 type WebFrame struct {
 	glib.GObject
 }
+
 func (v *WebFrame) getWebFrame() *C.WebKitWebFrame {
 	return C.to_WebKitWebFrame(unsafe.Pointer(v.Object))
 }
@@ -310,10 +327,12 @@ func (v *WebFrame) getWebFrame() *C.WebKitWebFrame {
 func (v *WebFrame) GetHorizontalScrollbarPolicy() uint {
 	return uint(C.webkit_web_frame_get_horizontal_scrollbar_policy(v.getWebFrame()))
 }
+
 // WebKitLoadStatus    webkit_web_frame_get_load_status    (WebKitWebFrame *frame);
 func (v *WebFrame) GetName() string {
 	return C.GoString(C.to_charptr(C.webkit_web_frame_get_name(v.getWebFrame())))
 }
+
 // WebKitNetworkResponse * webkit_web_frame_get_network_response(WebKitWebFrame *frame);
 // WebKitWebFrame* webkit_web_frame_get_parent(WebKitWebFrame *frame);
 // WebKitWebDataSource * webkit_web_frame_get_provisional_data_source(WebKitWebFrame *frame);
@@ -331,6 +350,7 @@ func (v *WebFrame) GetWebView() *WebView {
 	//return &WebKitWebView{gtk.GtkWidget{gtk.WidgetFromNative(unsafe.Pointer(C.webkit_web_frame_get_web_view(v.getWebFrame())))}}
 	return nil
 }
+
 // void webkit_web_frame_load_alternate_string(WebKitWebFrame *frame, const gchar *content, const gchar *base_url, const gchar *unreachable_url);
 // void webkit_web_frame_load_request(WebKitWebFrame *frame, WebKitNetworkRequest *request);
 func (v *WebFrame) LoadString(content, mime_type, encoding, base_uri string) {
@@ -355,6 +375,7 @@ func NewWebFrame(view *WebView) *WebFrame {
 func (v *WebFrame) Print() {
 	C.webkit_web_frame_print(v.getWebFrame())
 }
+
 // GtkPrintOperationResult  webkit_web_frame_print_full    (WebKitWebFrame *frame,
 //                                                          GtkPrintOperation *operation,
 //                                                          GtkPrintOperationAction action,
@@ -388,12 +409,80 @@ func NetworkRequestFromNative(p unsafe.Pointer) WebKitNetworkRequest {
 	return WebKitNetworkRequest{glib.GObject{p}}
 }
 
-func (nr *WebKitNetworkRequest)URL() string {
+func (nr *WebKitNetworkRequest) URL() string {
 	return C.GoString(C.to_charptr(C.webkit_network_request_get_uri((*C.WebKitNetworkRequest)(nr.GObject.Object))))
 }
 
-func (nr *WebKitNetworkRequest)SetURL(url string) {
+func (nr *WebKitNetworkRequest) SetURL(url string) {
 	ptr := C.CString(url)
 	defer C.free_string(ptr)
 	C.webkit_network_request_set_uri((*C.WebKitNetworkRequest)(nr.GObject.Object), C.to_gcharptr(ptr))
 }
+
+//-----------------------------------------------------------------------
+// Download
+//-----------------------------------------------------------------------
+type Download struct {
+	glib.GObject
+}
+
+// WebKitDownload*
+// webkit_download_new (WebKitNetworkRequest *request);
+
+func DownloadFromNative(p unsafe.Pointer) *Download {
+	return &Download{glib.GObject{p}}
+}
+
+func (d *Download) getDownload() *C.WebKitDownload {
+	return C.to_WebKitDownload(d.Object)
+}
+
+func (d *Download) Start() {
+	C.webkit_download_start(d.getDownload())
+}
+
+func (d *Download) Cancel() {
+	C.webkit_download_cancel(d.getDownload())
+}
+
+func (d *Download) GetURI() string {
+	return C.GoString(C.to_charptr(C.webkit_download_get_uri(d.getDownload())))
+}
+
+// WebKitNetworkRequest*
+// webkit_download_get_network_request (WebKitDownload *download);
+
+// WebKitNetworkResponse*
+// webkit_download_get_network_response (WebKitDownload *download);
+
+func (d *Download) GetSuggestedFilename() string {
+	return C.GoString(C.to_charptr(C.webkit_download_get_suggested_filename(d.getDownload())))
+}
+
+func (d *Download) GetDestinationURI() string {
+	return C.GoString(C.to_charptr(C.webkit_download_get_destination_uri(d.getDownload())))
+}
+
+func (d *Download) SetDestinationURI(dst string) {
+	pdst := C.CString(dst)
+	defer C.free_string(pdst)
+	C.webkit_download_set_destination_uri(d.getDownload(), C.to_gcharptr(pdst))
+}
+
+func (d *Download) GetProgress() float32 {
+	return float32(C.webkit_download_get_progress(d.getDownload()))
+}
+
+// gdouble
+// webkit_download_get_elapsed_time (WebKitDownload *download);
+
+func (d *Download) GetTotalSize() uint64 {
+	return uint64(C.webkit_download_get_total_size(d.getDownload()))
+}
+
+func (d *Download) GetCurrentSize() uint64 {
+	return uint64(C.webkit_download_get_current_size(d.getDownload()))
+}
+
+// WebKitDownloadStatus
+// webkit_download_get_status (WebKitDownload *download);
